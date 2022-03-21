@@ -1,0 +1,32 @@
+language: node_js
+node_js:
+  - 13
+
+services:
+  - docker
+
+env:
+  - DOCKER_COMPOSE_VERSION=1.24.1
+
+# Pre-testing installs
+install:
+  - echo "nothing needs to be installed"
+
+# Scripts to be run such as tests
+before_script:
+  - echo "no tests"
+
+script:
+  - docker --version # print the version for logging
+  - docker-compose -f docker-compose-build.yaml build --parallel
+  - docker tag udagram-frontend shaormel/udagram-frontend:latest
+  - docker tag udagram-api-feed shaormel/udagram-api-feed
+  - docker tag udagram-api-user shaormel/udagram-api-user
+  - docker tag reverseproxy shaormel/reverseproxy
+
+after_success:
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker push shaormel/udagram-frontend:latest
+  - docker push shaormel/udagram-api-feed
+  - docker push shaormel/udagram-api-user
+  - docker push shaormel/reverseproxy
